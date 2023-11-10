@@ -1,25 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react'
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom'
+import Posts from './pages/Posts'
+import Navbar from './Componets/UI/Navbar/Navbar'
+import { privateRoutes, publicRoutes } from './router/index'
+import Login from './pages/Login'
+import { AuthContext } from './context'
 
-function App() {
+const App = () => {
+  const [isAuth, setIsAuth] = useState(false);
+  useEffect(() => {
+    if(localStorage.getItem('auth')) {
+      setIsAuth(true);
+    }
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    <AuthContext.Provider value={{
+      isAuth,
+      setIsAuth
+    }} >
+      <BrowserRouter>
+      <Navbar />
+      {isAuth 
+        ?
+        <Routes>
+          {privateRoutes.map((route) => 
+            <Route path={route.path} element={route.element} key={route.path} />
+          )}
+          <Route path='*' element={<Posts />} />
+        </Routes>
+        :
+        <Routes>
+          {publicRoutes.map((route) => 
+            <Route path={route.path} element={route.element} key={route.path} />
+          )}
+          <Route path='*' element={<Login />} />
+        </Routes>
+        }
+      </BrowserRouter>
+    </AuthContext.Provider>
+  )
 }
 
-export default App;
+export default App
